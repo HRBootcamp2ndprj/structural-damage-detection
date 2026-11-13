@@ -1,10 +1,29 @@
-# FE 모델 (3D spine 보 모델) — 담당: 시뮬레이터
+# FE 모델 (3D spine 보 모델) — 담당: 시뮬레이터. 단위: N, m, kg
+# 고유진동수로는 강성/질량 비만 식별된다. 질량은 고정하고 강성을 보정하므로 단면값은 "등가값"이다.
+# "보정" 표시가 붙은 값은 scripts/calibrate_fem.py가 덮어쓴다.
 geometry:
   spans_m: [14.0, 30.0, 14.0]      # 3경간 (HF README의 2경간은 오류)
   elements_per_m: 1
-section: {}                         # TODO: 박스거더 A, Iy, Iz, J
-material: {}                        # TODO: E, ρ
-supports: {}                        # TODO: 교각·단부 스프링
+section:                            # 박스거더 (폭 약 8.6m)
+  A: 4.0                            # m², 추정치
+  Iy_vertical: 0.2884                  # m⁴, 연직 휨 (보정)
+  Iz_lateral: 25.0                  # m⁴, 횡 휨, 추정치 (횡1은 교각·단부가 지배해서 보정하지 않음)
+  J: 2.864                            # m⁴, 비틀림 (보정)
+  mass_per_m: 12000.0               # kg/m, 거더 + 포장, 추정치
+  radius_of_gyration_m: 2.5         # 비틀림 회전질량 = mass_per_m · r² (spine 요소에는 없어서 절점에 직접 넣음)
+material:
+  E: 3.75e+10                       # Pa (PyYAML은 3.75e10을 문자열로 읽으므로 e+ 표기)
+  nu: 0.2
+pier:                               # 교각 1개소(기둥 2개)를 등가 단일 부재로
+  height_m: 6.0                     # 추정치
+  n_elements: 3
+  A: 2.0
+  Iy: 50.0                          # 교축 방향 휨. 거더와 거의 강결로 둠 (연직2/연직1 비를 실측에 가깝게)
+  Iz: 0.2424                           # 횡 방향 휨 (보정)
+  J: 1.0
+  mass_per_m: 5000.0
+supports:
+  abutment_lateral_k: 4.727e+08        # N/m, 단부 횡 스프링 (보정)
 calibration:
-  # 실측 시나리오 0의 FDD 진동수로 갱신 (scripts/extract_real_features.py 결과)
+  # 실측 시나리오 0의 FDD 진동수로 갱신 (scripts/extract_real_features.py 결과). 지금은 문헌값
   target_hz: {vertical1: 3.9, lateral1: 5.0, vertical2: 9.8, torsion_lateral2: 10.3}

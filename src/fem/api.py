@@ -3,10 +3,12 @@
 A는 이 함수만 반복 호출하고, OpenSees 내부 구현에는 의존하지 않는다.
 """
 from dataclasses import dataclass, field
+from functools import cache
 
 import numpy as np
 
-from src.features.schema import MODES
+from src.fem.model import load_config, solve
+from src.fem.modes import identify
 
 
 @dataclass(frozen=True)
@@ -21,7 +23,7 @@ class Damage:
 class ModalParams:
     """보정된 기준 모델 대비 환경 변동."""
 
-    env_stiffness: float = 0.0  # 전역 강성 상대 변동 (온도 대용), 예: -0.01 = -1%
+    env_stiffness: float = 0.0  # 전역 탄성계수 상대 변동 (온도 대용), 예: -0.01 = E × 0.99
     extra: dict = field(default_factory=dict)  # C가 필요하면 추가 (감쇠 등)
 
 
@@ -31,6 +33,14 @@ class ModalResult:
     stiffness_loss: float  # 손상 구간 강성 감소율 0~1 (회귀 목표)
 
 
+@cache
+def _config() -> dict:
+    return load_config()
+
+
 def run_modal(params: ModalParams, damage: Damage | None) -> ModalResult:
     """고유치 해석 1회. damage=None이면 손상 없음 (시뮬 기준선 f₀)."""
-    raise NotImplementedError(f"run_modal: C 담당 — MODES={MODES}")
+    if damage is not None:
+        raise NotImplementedError("손상 함수는 아직 없음 (11/18 예정). 지금은 damage=None만 지원")
+    freqs, participation, _ = solve(_config(), e_scale=1.0 + params.env_stiffness)
+    return ModalResult(freqs_hz=identify(freqs, participation), stiffness_loss=0.0)
