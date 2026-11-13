@@ -1,10 +1,8 @@
-# 시뮬 데이터 생성 — 담당: 시뮬레이터 + 데이터 생성
-n_per_scenario: 500
+# 시뮬 데이터 생성 — 담당: A (시뮬레이터 run_modal 반복 호출)
+n_per_group: 1000           # 그룹(healthy/settlement/local/prestress_loss)당 샘플 수
 seed: 42
-variability:
-  stiffness_pct: 3.0        # 온도 대용 전역 강성 변동 ±%
-  freq_noise_pct: 0.5       # 진동수 추정 오차 모사
-groups:                     # 손상 그룹별 시뮬 손상 모델 (CONTEXT.md 참고)
-  settlement: {}            # 균열 구간 EI 감소
-  local: {}                 # 단면 축소 (박리)
-  prestress_loss: {}        # 프리스트레스 손실 → 강성 감소
+severity: {low: 0.0, high: 1.0}   # 연속 균등 샘플링, 실측 mm에 맞추지 않음 (ADR 0004)
+environment:
+  env_stiffness_pct: 1.0    # 전역 강성 변동 ±% (온도 대용) — 시뮬 검증 분할로만 조정
+noise:
+  sigma0_scale: [0.5, 1.5]  # 진동수 노이즈 표준편차 = σ₀ × U(범위), σ₀는 실측 시나리오 0에서 산출

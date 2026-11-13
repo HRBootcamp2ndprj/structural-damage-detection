@@ -6,6 +6,5 @@ pyyaml
 tqdm
 scikit-learn
 openseespy
-streamlit
-plotly
+flask
 pytest
