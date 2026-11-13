@@ -1,10 +1,10 @@
-"""evaluate 진입점. 사용법: python scripts/evaluate.py --config configs/train_baseline.yaml"""
+"""학습된 분류기를 실측 특징으로 평가 (시나리오 0 제외, 10·11은 따로 보고)"""
 import argparse
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="configs/train_baseline.yaml")
+    parser.add_argument("--config", default="configs/train.yaml")
     args = parser.parse_args()
     raise NotImplementedError(f"evaluate: {args.config}")
 

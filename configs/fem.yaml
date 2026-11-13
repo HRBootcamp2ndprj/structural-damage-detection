@@ -1,0 +1,10 @@
+# FE 모델 (3D spine 보 모델) — 담당: 시뮬레이터
+geometry:
+  spans_m: [14.0, 30.0, 14.0]      # 3경간 (HF README의 2경간은 오류)
+  elements_per_m: 1
+section: {}                         # TODO: 박스거더 A, Iy, Iz, J
+material: {}                        # TODO: E, ρ
+supports: {}                        # TODO: 교각·단부 스프링
+calibration:
+  # 실측 시나리오 0의 FDD 진동수로 갱신 (scripts/extract_real_features.py 결과)
+  target_hz: {vertical1: 3.9, lateral1: 5.0, vertical2: 9.8, torsion_lateral2: 10.3}

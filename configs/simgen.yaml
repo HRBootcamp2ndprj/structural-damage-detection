@@ -1,0 +1,8 @@
+# 시뮬 데이터 생성 — 담당: A (시뮬레이터 run_modal 반복 호출)
+n_per_group: 1000           # 그룹(healthy/settlement/local/prestress_loss)당 샘플 수
+seed: 42
+severity: {low: 0.0, high: 1.0}   # 연속 균등 샘플링, 실측 mm에 맞추지 않음 (ADR 0004)
+environment:
+  env_stiffness_pct: 1.0    # 전역 강성 변동 ±% (온도 대용) — 시뮬 검증 분할로만 조정
+noise:
+  sigma0_scale: [0.5, 1.5]  # 진동수 노이즈 표준편차 = σ₀ × U(범위), σ₀는 실측 시나리오 0에서 산출

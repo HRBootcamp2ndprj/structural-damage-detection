@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Z24 손상 탐지 대시보드</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0 auto; max-width: 1100px; padding: 16px; }
+    section { margin-bottom: 32px; }
+  </style>
+</head>
+<body>
+  <h1>Z24 교량 손상 탐지 — 시뮬 학습, 실측 검증</h1>
+
+  <section>
+    <h2>실측 vs 시뮬 Δf/f₀</h2>
+    <!-- TODO(D): 모드 선택, 그룹별 색상 -->
+    <canvas id="ratio-scatter"></canvas>
+  </section>
+
+  <section>
+    <h2>실측 시나리오별 진동수 변화</h2>
+    <canvas id="scenario-shift"></canvas>
+  </section>
+
+  <section>
+    <h2>실측 테스트 결과</h2>
+    <select id="experiment"></select>
+    <div id="metrics"></div>
+  </section>
+
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+</html>
