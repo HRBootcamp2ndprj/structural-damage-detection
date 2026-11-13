@@ -2,6 +2,7 @@
 
 전역 좌표: X = 교축, Y = 횡, Z = 연직. 거더는 Z=0, 교각은 그 아래로 내려간다.
 """
+import threading
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -11,6 +12,8 @@ import yaml
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[2] / "configs" / "fem.yaml"
 N_EIGEN = 12
+# OpenSees는 프로세스에 모델이 하나뿐이다. 스레드끼리 동시에 만들면 서로의 절점을 덮어쓴다.
+_OPENSEES = threading.Lock()
 
 
 @dataclass(frozen=True)
@@ -56,6 +59,12 @@ def geometry(cfg: dict) -> Geometry:
 
 
 def solve(cfg: dict, e_scale: float = 1.0, field: StiffnessField | None = None):
+    """_solve를 프로세스 전역 잠금 안에서 실행한다. 병렬화는 프로세스 단위로만 효과가 있다."""
+    with _OPENSEES:
+        return _solve(cfg, e_scale, field)
+
+
+def _solve(cfg: dict, e_scale: float, field: StiffnessField | None):
     """고유치 해석. 반환: (진동수 오름차순 (N_EIGEN,), 거더 참여도 (N_EIGEN, 4), Geometry).
 
     거더 참여도: 모드 운동에너지 중 거더 절점의 ux, uy, uz, rx 몫. 행 합 = 거더 몫 (교각 국부 모드는 작다).

@@ -41,10 +41,13 @@ def _config() -> dict:
 
 
 def run_modal(params: ModalParams, damage: Damage | None) -> ModalResult:
-    """고유치 해석 1회. damage=None이면 손상 없음 (시뮬 기준선 f₀)."""
+    """고유치 해석 1회. damage=None이면 손상 없음 (시뮬 기준선 f₀).
+
+    호출당 수 ms라 직렬로 충분하다. 병렬화하려면 프로세스 병렬을 쓴다. 스레드 병렬은 잠금 때문에 빨라지지 않는다.
+    """
     cfg = _config()
-    field = None if damage is None else stiffness_field(
+    stiffness = None if damage is None else stiffness_field(
         geometry(cfg), cfg["damage"], damage.group, damage.severity, damage.location)
-    freqs, participation, _ = solve(cfg, e_scale=1.0 + params.env_stiffness, field=field)
-    loss = 0.0 if field is None else stiffness_loss(field)
+    freqs, participation, _ = solve(cfg, e_scale=1.0 + params.env_stiffness, field=stiffness)
+    loss = 0.0 if stiffness is None else stiffness_loss(stiffness)
     return ModalResult(freqs_hz=identify(freqs, participation), stiffness_loss=loss)

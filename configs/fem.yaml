@@ -6,9 +6,9 @@ geometry:
   elements_per_m: 1
 section:                            # 박스거더 (폭 약 8.6m)
   A: 4.0                            # m², 추정치
-  Iy_vertical: 0.2884                  # m⁴, 연직 휨 (보정)
+  Iy_vertical: 2.8750e-01                  # m⁴, 연직 휨 (보정)
   Iz_lateral: 25.0                  # m⁴, 횡 휨, 추정치 (횡1은 교각·단부가 지배해서 보정하지 않음)
-  J: 2.864                            # m⁴, 비틀림 (보정)
+  J: 4.4164e+00                            # m⁴, 비틀림 (보정)
   mass_per_m: 12000.0               # kg/m, 거더 + 포장, 추정치
   radius_of_gyration_m: 2.5         # 비틀림 회전질량 = mass_per_m · r² (spine 요소에는 없어서 절점에 직접 넣음)
 material:
@@ -19,11 +19,11 @@ pier:                               # 교각 1개소(기둥 2개)를 등가 단�
   n_elements: 3
   A: 2.0
   Iy: 50.0                          # 교축 방향 휨. 거더와 거의 강결로 둠 (연직2/연직1 비를 실측에 가깝게)
-  Iz: 0.2424                           # 횡 방향 휨 (보정)
+  Iz: 1.4025e-01                           # 횡 방향 휨 (보정)
   J: 1.0
   mass_per_m: 5000.0
 supports:
-  abutment_lateral_k: 4.727e+08        # N/m, 단부 횡 스프링 (보정)
+  abutment_lateral_k: 4.727e+08        # N/m, 단부 횡 스프링. 고정값 (보정 변수에서 뺀 이유는 src/fem/calibrate.py)
 damage:
   # 손상 함수 수치 (src/fem/damage.py). 물리 사전값이며 실측 진동수 변화에 맞추지 않는다 (ADR 0002, 0005).
   # max_loss: severity=1일 때 손상 구간의 최대 강성 감소율. 균열 단면 휨강성 30~50% 경험치 기반 추정치.

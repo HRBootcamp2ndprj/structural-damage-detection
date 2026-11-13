@@ -52,7 +52,8 @@ def main():
 
     r, y = simulate(args.n, args.sigma0, args.env_pct, args.sev_low, args.seed)
     v1, l1, v2 = (MODES.index(m) for m in ("vertical1", "lateral1", "vertical2"))
-    # 횡1은 손상에 거의 안 움직이고 온도에는 움직이므로, 빼 주면 온도 변동이 상쇄된다
+    # 횡1은 손상에 거의 안 움직이고 온도에는 움직이므로, 빼 주면 온도 변동이 줄어든다.
+    # 단부 횡 스프링은 온도에 따라 변하지 않아서 횡1이 연직보다 덜 움직이므로 완전히 상쇄되지는 않는다
     views = [
         ("raw", r[:, v1], r[:, v2], "Δf/f₀ vertical1 [%]", "Δf/f₀ vertical2 [%]"),
         ("minus lateral1", r[:, v1] - r[:, l1], r[:, v2] - r[:, l1],

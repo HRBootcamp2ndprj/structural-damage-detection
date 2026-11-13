@@ -10,6 +10,15 @@ from src.features.schema import MODES
 FAMILIES = ("longitudinal", "lateral", "vertical", "torsion")
 # 거더 몫이 이보다 작으면 교각 국부 모드로 보고 버린다
 MIN_DECK_SHARE = 0.5
+# MODES 각각을 (지배 자유도, 그 자유도 모드 중 몇 번째)로 정의한다.
+# torsion_lateral2는 실측에서 비틀림과 횡2가 섞인 모드지만, 시뮬에서는 비틀림 지배 모드로 고정한다.
+# 횡2를 고르면 비틀림 강성을 줄이는 국부손상이 이 특징에서 사라지고, 보정 출발점에 따라 둘이 뒤바뀐다.
+DEFINITION = {
+    "vertical1": ("vertical", 0),
+    "lateral1": ("lateral", 0),
+    "vertical2": ("vertical", 1),
+    "torsion_lateral2": ("torsion", 0),
+}
 
 
 def classify(participation: np.ndarray) -> list[str]:
@@ -19,24 +28,18 @@ def classify(participation: np.ndarray) -> list[str]:
             for d, i in zip(deck, np.argmax(participation, axis=1))]
 
 
-def identify(freqs_hz: np.ndarray, participation: np.ndarray) -> np.ndarray:
-    """진동수 오름차순 모드들에서 MODES 순서의 진동수 4개를 고른다. 못 찾으면 NaN.
-
-    - vertical1, vertical2: 첫째·둘째 연직 모드
-    - lateral1: 첫째 횡 모드
-    - torsion_lateral2: lateral1 이후 첫 횡 또는 비틀림 모드 (실측에서 둘이 섞인 모드)
-    """
+def pick(participation: np.ndarray) -> np.ndarray:
+    """진동수 오름차순 모드들에서 MODES 순서로 고른 모드 인덱스. 못 찾으면 -1."""
     families = classify(participation)
-    vertical = [f for f, k in zip(freqs_hz, families) if k == "vertical"]
-    side = [f for f, k in zip(freqs_hz, families) if k in ("lateral", "torsion")]
-    lateral = [f for f, k in zip(freqs_hz, families) if k == "lateral"]
+    out = []
+    for m in MODES:
+        family, rank = DEFINITION[m]
+        idx = [i for i, k in enumerate(families) if k == family]
+        out.append(idx[rank] if len(idx) > rank else -1)
+    return np.array(out)
 
-    lateral1 = lateral[0] if lateral else np.nan
-    after_l1 = [f for f in side if f > lateral1] if lateral else []
-    picked = {
-        "vertical1": vertical[0] if len(vertical) > 0 else np.nan,
-        "lateral1": lateral1,
-        "vertical2": vertical[1] if len(vertical) > 1 else np.nan,
-        "torsion_lateral2": after_l1[0] if after_l1 else np.nan,
-    }
-    return np.array([picked[m] for m in MODES], dtype=float)
+
+def identify(freqs_hz: np.ndarray, participation: np.ndarray) -> np.ndarray:
+    """MODES 순서의 진동수 4개. 못 찾으면 NaN."""
+    idx = pick(participation)
+    return np.where(idx >= 0, np.asarray(freqs_hz, dtype=float)[idx], np.nan)
