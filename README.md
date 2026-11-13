@@ -22,6 +22,17 @@ OpenSees로 Z24 교량(스위스, 3경간 14+30+14m 프리스트레스 콘크리
 - 특징은 각 도메인의 자기 기준선 대비 진동수 변화율 Δf/f₀ (ADR 0001)
 - 실측 손상 전 데이터(라벨 0)는 FE 보정과 f₀ 산출에만 쓰고, 나머지는 전부 테스트 (ADR 0002)
 
+## 역할
+
+| 담당 | 범위 | 주요 경로 |
+|---|---|---|
+| A 데이터 생성/정형 | 실측 전처리·FDD, 시뮬 생성 실행, 특징 CSV | `src/data`, `src/features`, `src/simgen` |
+| B 모델 | 분류기(손상 유무·그룹) 학습 | `src/models`, `scripts/train.py` |
+| C 시뮬레이터 | OpenSees 3D spine 모델, 보정, 손상 모델링 | `src/fem`, `scripts/calibrate_fem.py` |
+| D 시각화 | Streamlit 대시보드, 평가 지표, 발표 자료 | `app/`, `src/evaluation` |
+
+공통 인터페이스는 [docs/feature_schema.md](docs/feature_schema.md)입니다.
+
 ## 디렉토리 구조
 
 ```
