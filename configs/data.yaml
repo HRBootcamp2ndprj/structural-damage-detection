@@ -1,0 +1,8 @@
+# 데이터셋 설정 (클래스는 데이터 확정 후 수정)
+root: data/processed
+splits:
+  train: data/splits/train.txt
+  val: data/splits/val.txt
+  test: data/splits/test.txt
+classes:
+  - crack
