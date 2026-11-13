@@ -1,0 +1,10 @@
+# 시뮬 데이터 생성 — 담당: 시뮬레이터 + 데이터 생성
+n_per_scenario: 500
+seed: 42
+variability:
+  stiffness_pct: 3.0        # 온도 대용 전역 강성 변동 ±%
+  freq_noise_pct: 0.5       # 진동수 추정 오차 모사
+groups:                     # 손상 그룹별 시뮬 손상 모델 (CONTEXT.md 참고)
+  settlement: {}            # 균열 구간 EI 감소
+  local: {}                 # 단면 축소 (박리)
+  prestress_loss: {}        # 프리스트레스 손실 → 강성 감소

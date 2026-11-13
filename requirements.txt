@@ -1,9 +1,11 @@
 numpy
+scipy
 pandas
 matplotlib
-opencv-python
 pyyaml
 tqdm
 scikit-learn
-torch
-torchvision
+openseespy
+streamlit
+plotly
+pytest

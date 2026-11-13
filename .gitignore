@@ -1,6 +1,7 @@
 # Data & artifacts (공유 드라이브로 관리)
 data/raw/*
 data/processed/*
+data/sim/*
 !data/**/.gitkeep
 models/*
 !models/.gitkeep

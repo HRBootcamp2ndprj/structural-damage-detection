@@ -1,0 +1,12 @@
+# 실측 전처리 + FDD — 실측·시뮬 공통 특징 정의
+fs_hz: 100
+preprocess:
+  detrend: linear
+  glitch_sigma: 20          # 이 이상은 스파이크로 보고 제거
+fdd:
+  nperseg: 2048
+modes:                      # 피크 탐색 대역 [Hz]
+  vertical1: [3.5, 4.3]
+  lateral1: [4.6, 5.4]
+  vertical2: [9.3, 10.05]
+  torsion_lateral2: [10.05, 10.8]
