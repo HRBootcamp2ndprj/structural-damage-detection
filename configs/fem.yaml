@@ -24,6 +24,21 @@ pier:                               # 교각 1개소(기둥 2개)를 등가 단�
   mass_per_m: 5000.0
 supports:
   abutment_lateral_k: 4.727e+08        # N/m, 단부 횡 스프링 (보정)
+damage:
+  # 손상 함수 수치 (src/fem/damage.py). 물리 사전값이며 실측 진동수 변화에 맞추지 않는다 (ADR 0002, 0005).
+  # max_loss: severity=1일 때 손상 구간의 최대 강성 감소율. 균열 단면 휨강성 30~50% 경험치 기반 추정치.
+  # location(0~1)은 A가 severity처럼 샘플링한다.
+  settlement:                       # 교각 위 거더 균열, 연직 휨만
+    max_loss: 0.5
+    half_width_m: [3.0, 6.0]        # location 0 → 3m, 1 → 6m
+  local:                            # 박리 패치, 연직 휨 + 비틀림
+    max_loss: 0.3
+    length_m: 3.0
+    region_m: [14.0, 44.0]          # 주경간. 측경간 패치는 진동수가 거의 안 변해 라벨 노이즈만 됨
+  prestress_loss:                   # 긴 구간의 작은 감소, 연직 휨만
+    max_loss: 0.12
+    length_m: 15.0
+    region_m: [14.0, 44.0]
 calibration:
   # 실측 시나리오 0의 FDD 진동수로 갱신 (scripts/extract_real_features.py 결과). 지금은 문헌값
   target_hz: {vertical1: 3.9, lateral1: 5.0, vertical2: 9.8, torsion_lateral2: 10.3}

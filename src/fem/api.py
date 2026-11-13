@@ -7,7 +7,8 @@ from functools import cache
 
 import numpy as np
 
-from src.fem.model import load_config, solve
+from src.fem.damage import stiffness_field, stiffness_loss
+from src.fem.model import geometry, load_config, solve
 from src.fem.modes import identify
 
 
@@ -17,6 +18,7 @@ class Damage:
 
     group: str
     severity: float  # 0~1 연속값. 실측 mm·시나리오에 맞추지 않는다 (ADR 0004)
+    location: float = 0.5  # 0~1, 그룹별 허용 구간 안의 상대 위치·범위. A가 균등 샘플링 (ADR 0005)
 
 
 @dataclass(frozen=True)
@@ -40,7 +42,9 @@ def _config() -> dict:
 
 def run_modal(params: ModalParams, damage: Damage | None) -> ModalResult:
     """고유치 해석 1회. damage=None이면 손상 없음 (시뮬 기준선 f₀)."""
-    if damage is not None:
-        raise NotImplementedError("손상 함수는 아직 없음 (11/18 예정). 지금은 damage=None만 지원")
-    freqs, participation, _ = solve(_config(), e_scale=1.0 + params.env_stiffness)
-    return ModalResult(freqs_hz=identify(freqs, participation), stiffness_loss=0.0)
+    cfg = _config()
+    field = None if damage is None else stiffness_field(
+        geometry(cfg), cfg["damage"], damage.group, damage.severity, damage.location)
+    freqs, participation, _ = solve(cfg, e_scale=1.0 + params.env_stiffness, field=field)
+    loss = 0.0 if field is None else stiffness_loss(field)
+    return ModalResult(freqs_hz=identify(freqs, participation), stiffness_loss=loss)

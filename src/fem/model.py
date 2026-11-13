@@ -25,6 +25,22 @@ class Geometry:
         return 0.5 * (self.deck_x[:-1] + self.deck_x[1:])
 
 
+@dataclass(frozen=True)
+class StiffnessField:
+    """거더 요소별 강성 배율 (손상 없음 = 1). 손상 함수의 출력이자 모델의 입력.
+
+    균열·박리는 주로 연직 휨을 줄이고 횡 휨은 거의 건드리지 않으므로 Iz 배율은 두지 않는다.
+    그래서 손상은 연직·비틀림 모드만 움직이고, 4개 모드를 함께 움직이는 온도 변동과 구분된다.
+    """
+
+    iy: np.ndarray  # 연직 휨
+    j: np.ndarray  # 비틀림
+
+    @classmethod
+    def intact(cls, n_elements: int) -> "StiffnessField":
+        return cls(iy=np.ones(n_elements), j=np.ones(n_elements))
+
+
 def load_config(path=DEFAULT_CONFIG) -> dict:
     with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -39,20 +55,20 @@ def geometry(cfg: dict) -> Geometry:
     return Geometry(deck_x=deck_x, pier_x=(float(edges[1]), float(edges[2])))
 
 
-def solve(cfg: dict, e_scale: float = 1.0, deck_stiffness: np.ndarray | None = None):
+def solve(cfg: dict, e_scale: float = 1.0, field: StiffnessField | None = None):
     """고유치 해석. 반환: (진동수 오름차순 (N_EIGEN,), 거더 참여도 (N_EIGEN, 4), Geometry).
 
     거더 참여도: 모드 운동에너지 중 거더 절점의 ux, uy, uz, rx 몫. 행 합 = 거더 몫 (교각 국부 모드는 작다).
 
     e_scale: 전역 탄성계수 배율 (환경 변동).
-    deck_stiffness: 거더 요소별 휨강성 배율 (len = 거더 요소 수). None이면 전부 1 (손상 없음).
+    field: 거더 요소별 강성 배율. None이면 손상 없음.
     """
     geo = geometry(cfg)
     n_deck = len(geo.deck_x)
-    if deck_stiffness is None:
-        deck_stiffness = np.ones(n_deck - 1)
-    if len(deck_stiffness) != n_deck - 1:
-        raise ValueError(f"deck_stiffness length {len(deck_stiffness)} != {n_deck - 1} deck elements")
+    if field is None:
+        field = StiffnessField.intact(n_deck - 1)
+    if len(field.iy) != n_deck - 1 or len(field.j) != n_deck - 1:
+        raise ValueError(f"StiffnessField length != {n_deck - 1} deck elements")
 
     mat, sec, pier, sup = cfg["material"], cfg["section"], cfg["pier"], cfg["supports"]
     E = mat["E"] * e_scale
@@ -75,9 +91,9 @@ def solve(cfg: dict, e_scale: float = 1.0, deck_stiffness: np.ndarray | None = N
         mt = m * L
         masses[i + 1] = (mt, mt, mt, mt * r**2, 1e-6 * mt, 1e-6 * mt)
 
-    for e, k in enumerate(deck_stiffness):
-        ops.element("elasticBeamColumn", e + 1, e + 1, e + 2, sec["A"], E, G, sec["J"],
-                    sec["Iy_vertical"] * k, sec["Iz_lateral"] * k, 1)
+    for e, (kiy, kj) in enumerate(zip(field.iy, field.j)):
+        ops.element("elasticBeamColumn", e + 1, e + 1, e + 2, sec["A"], E, G, sec["J"] * kj,
+                    sec["Iy_vertical"] * kiy, sec["Iz_lateral"], 1)
 
     # 교각: 거더와 강결, 기초 고정
     node_id, ele_id = n_deck + 1, n_deck

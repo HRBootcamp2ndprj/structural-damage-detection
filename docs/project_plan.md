@@ -97,5 +97,5 @@ OpenSees로 Z24 교량을 모델링해 손상별 고유진동수를 만들고, �
 | [feature_schema.md](feature_schema.md) | 특징 CSV 형식 |
 | [interfaces.md](interfaces.md) | 역할 간 인터페이스 |
 | [evaluation_protocol.md](evaluation_protocol.md) | 분할, 지표, 비교 실험 |
-| [adr/](adr/) | 0001 특징 / 0002 실측 사용·누수 / 0003 대시보드 / 0004 연속 손상 강도 |
+| [adr/](adr/) | 0001 특징 / 0002 실측 사용·누수 / 0003 대시보드 / 0004 연속 손상 강도 / 0005 손상 함수 |
 | [app/README.md](../app/README.md) | 대시보드 범위와 API |

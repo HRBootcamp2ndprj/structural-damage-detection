@@ -13,14 +13,16 @@ C 시뮬레이터 ──run_modal()──> A 시뮬 데이터 생성 ──sim_f
 ```python
 run_modal(params: ModalParams, damage: Damage | None) -> ModalResult
 # ModalParams(env_stiffness=0.0, extra={})
-# Damage(group="settlement", severity=0.7)          # severity 0~1 연속
+# Damage(group="settlement", severity=0.7, location=0.3)  # severity, location 모두 0~1 연속
 # ModalResult(freqs_hz=np.array([...4개, MODES 순서]), stiffness_loss=0.42)
 ```
 
 - `damage=None`이면 손상 없음이고, 이때의 결과가 시뮬 기준선 f₀다.
 - 모드 대응(MAC 또는 모드형상 판별로 연직1/횡1/연직2/비틀림·횡2 찾기)은 C가 책임진다. 대응에 실패하면 NaN을 돌려준다.
 - 호출 1회는 1초 이내를 목표로 한다. 시뮬 데이터 생성은 그룹당 수백~수천 회 호출한다.
-- 그룹별 손상 함수(어느 구간의 어떤 강성을 얼마나 줄이는지)는 C가 정하고 `configs/fem.yaml`에 기록한다.
+- 그룹별 손상 함수(어느 구간의 어떤 강성을 얼마나 줄이는지)는 C가 정하고 `configs/fem.yaml`의 `damage` 블록에 기록한다 (ADR 0005).
+- `location`은 그룹별 허용 구간 안의 상대 위치·범위다. 생략하면 0.5. A는 severity처럼 U(0, 1)로 샘플링한다. 위치를 하나로 고정하면 분류기가 한 가지 패턴만 외운다.
+- `Damage(group="healthy", ...)`는 손상 없음과 같다. `stiffness_loss`는 손상 구간의 최대 연직 휨강성 감소율 = 그룹별 `max_loss` × severity다.
 
 ## 2. A → C: 보정 목표값 (화요일 11/17까지)
 
